@@ -2,6 +2,7 @@
 
 namespace Calendar;
 
+use DateTime;
 use DateTimeInterface;
 
 class Calendar implements CalendarInterface {
@@ -27,7 +28,7 @@ class Calendar implements CalendarInterface {
      * @return int
      */
 	public function getWeekDay() {
-        return (int) $this->date->format('w');
+        return (int) $this->date->format('N');
     }
     
     /**
@@ -36,11 +37,7 @@ class Calendar implements CalendarInterface {
      * @return int
      */
     public function getFirstWeekDay() {
-        $year = $this->date->format('Y');
-        $month = $this->date->format('m');
-        $date = getdate(mktime( null, null, null, $month, 1, $year));
-
-        return (int) $date['wday'];
+        return (int) (new DateTime($this->date->format('Y-m-01')))->format('N');
     }
     
     /**
@@ -49,14 +46,7 @@ class Calendar implements CalendarInterface {
      * @return int
      */
     public function getFirstWeek() {
-        $date = clone $this->date;
-        $currentDay = $this->getDay();
-
-        if ($currentDay > 1) {
-            $date->modify('-' . ($currentDay-1) . ' day');
-        }
-
-        return (int) $date->format('W');
+        return (int) (new DateTime($this->date->format('Y-m-01')))->format('W');
     }
 
     /**
@@ -74,12 +64,7 @@ class Calendar implements CalendarInterface {
      * @return int
      */
     public function getNumberOfDaysInPreviousMonth() {
-        $date = clone $this->date;
-        $lastMonthDate = $date->modify('-1 month');
-        $month = (int) $lastMonthDate->format('m');
-        $year = (int) $lastMonthDate->format('Y');
-
-        return cal_days_in_month(CAL_GREGORIAN, $month, $year);
+       return (int) (new DateTime($this->date->format('Y-m-d')))->modify('last day of previous month')->format('j');
     }
 
     /**
@@ -88,37 +73,59 @@ class Calendar implements CalendarInterface {
      * @return array
      */
     public function getCalendar() {
+        $startNum = 0;
+        $weekIndex = 1;
+        $prevYearLastWeekReset = false;
+        $calendar = array();
+
         $date = clone $this->date;
         $firstWeekDay = $this->getFirstWeekDay();
         $firstWeek = $this->getFirstWeek();
-        $prevMonthDaysNum = $this->getNumberOfDaysInPreviousMonth();
+        $currentWeek = (int) $date->format('W');
         $currentMonthDaysNum = $this->getNumberOfDaysInThisMonth();
-        $weekday = $this->getWeekDay();
+        $currentMonth = (int) $date->format('m');
         $currentDay = $this->getDay();
-        $calendar = array();
-        $startNum = 0;
-        $index = 1;
+        $firstWeekFromLastYear = in_array($firstWeek, array(52, 53));
+        $allDays = ceil(($currentMonthDaysNum + ($firstWeekDay-1)) / 7) * 7;
 
-        if ($firstWeekDay > 1) {
-            $date->modify('-' . $currentDay . ' day');
-            $startNum = 0-$firstWeekDay;
-        } else {
+
+        /**
+         * Set the current calendar start date with monday
+         */
+        if ($firstWeekDay > 1 && $currentDay > 1) {
+            $date->modify('-' . ($currentDay+$firstWeekDay-2) . ' day');
+            $startNum -= $firstWeekDay;
+        }
+
+        if ($firstWeekDay == 1 && $currentDay > 1) {
             $date->modify('-' . ($currentDay-1) . ' day');
         }
 
-        for ( $i = $startNum; $i < 35; $i++ ) {
-            echo $date->format('m-d') . ' | ';
+        if ($firstWeekDay > 1 && $currentDay == 1) {
+            $date->modify('-' . ($firstWeekDay-1) . ' day');
+        }
 
-            $calendar[$firstWeek][(int) $date->format('d')] = false;
+        for ($i = 0; $i < $allDays; $i++) {
+            $highlight = false;
+            $firstWeekFromLastYear = in_array($firstWeek, array(52, 53));
 
-            if ( $index == 7 ) {
-                $index = 0;
-                $firstWeek += 1;
-                echo '<br>';
+            if (($currentWeek-1) == $firstWeek || (($currentWeek-1) == 0 && $firstWeekFromLastYear)) {
+                $highlight = true;
             }
             
+            $calendar[$firstWeek][(int) $date->format('d')] = $highlight;
+
+            if ($weekIndex % 7 == 0) {
+                if ($currentMonth == 1 && !$prevYearLastWeekReset) {
+                    $firstWeek = 0;
+                    $prevYearLastWeekReset = true;
+                }
+
+                $firstWeek += 1;
+            }
+
+            $weekIndex += 1;
             $date->modify('+1 day');
-            $index += 1;
         }
 
         return $calendar;

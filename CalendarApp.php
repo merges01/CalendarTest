@@ -4,10 +4,10 @@ namespace CalendarApp;
 
 require __DIR__ . '/vendor/autoload.php';
 
-use \DateTime;
+use DateTime;
 use Calendar;
 
-$date = new DateTime('2010-03-01');
+$date = new DateTime('2016-01-13');
 $calendar = new Calendar\Calendar( $date );
 
 //print_r($calendar->getWeekDay());

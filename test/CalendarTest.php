@@ -3,9 +3,9 @@
 namespace Calendar;
 
 use DateTime;
-use PHPUnit\Framework\TestCase;;
+use PHPUnit_Framework_TestCase;
 
-class CalendarTest extends TestCase
+class CalendarTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
