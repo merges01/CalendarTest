@@ -1,4 +1,4 @@
-Fork this repo and write a Calendar class which implements the CalendarInterface and pass all the unit tests.
+This repository was forked from https://github.com/vegvari/CalendarTest/
 
 The Calendar class should accept any DateTimeInterface implementation and based on that you have to "draw" the current month and highlight the previous week. Instead of actually drawing it, the getCalendar method should just return an array.
 
