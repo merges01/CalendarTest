@@ -1,11 +1,11 @@
 {
-    "name": "vegvari/calendartest",
+    "name": "zoltanmerges/calendartest",
     "description": "Calendar Test",
     "license": "MIT",
     "authors": [
         {
-            "name": "Romeo Vegvari",
-            "email": "romeo@vegvari.hu"
+            "name": "Zoltan Merges",
+            "email": "merges01@gmail.com"
         }
     ],
     "minimum-stability": "stable",
@@ -17,9 +17,7 @@
             "Calendar\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Calendar\\": "test/"
-        }
+    "require-dev": {
+        "phpunit/phpunit": "^7"
     }
 }
