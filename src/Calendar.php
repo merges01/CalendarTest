@@ -73,58 +73,31 @@ class Calendar implements CalendarInterface {
      * @return array
      */
     public function getCalendar() {
-        $startNum = 0;
-        $weekIndex = 1;
-        $prevYearLastWeekReset = false;
         $calendar = array();
-
         $date = clone $this->date;
         $firstWeekDay = $this->getFirstWeekDay();
         $firstWeek = $this->getFirstWeek();
         $currentWeek = (int) $date->format('W');
         $currentMonthDaysNum = $this->getNumberOfDaysInThisMonth();
         $currentMonth = (int) $date->format('m');
-        $currentDay = $this->getDay();
+        $currentYear = (int) $date->format('Y');
         $firstWeekFromLastYear = in_array($firstWeek, array(52, 53));
         $allDays = ceil(($currentMonthDaysNum + ($firstWeekDay-1)) / 7) * 7;
 
-
-        /**
-         * Set the current calendar start date with monday
-         */
-        if ($firstWeekDay > 1 && $currentDay > 1) {
-            $date->modify('-' . ($currentDay+$firstWeekDay-2) . ' day');
-            $startNum -= $firstWeekDay;
-        }
-
-        if ($firstWeekDay == 1 && $currentDay > 1) {
-            $date->modify('-' . ($currentDay-1) . ' day');
-        }
-
-        if ($firstWeekDay > 1 && $currentDay == 1) {
-            $date->modify('-' . ($firstWeekDay-1) . ' day');
-        }
+        $date = new DateTime($currentYear . '-' . $currentMonth . '-01');
+        $date->modify('-' . ($firstWeekDay -1) . 'day');
 
         for ($i = 0; $i < $allDays; $i++) {
             $highlight = false;
-            $firstWeekFromLastYear = in_array($firstWeek, array(52, 53));
+            $actualWeek = (int) $date->format('W');
+            $actualDay = (int) $date->format('d');
+            $firstWeekFromLastYear = in_array($actualWeek, array(52, 53));
 
-            if (($currentWeek-1) == $firstWeek || (($currentWeek-1) == 0 && $firstWeekFromLastYear)) {
+            if (($currentWeek-1) == $actualWeek || (($currentWeek-1) == 0 && $firstWeekFromLastYear)) {
                 $highlight = true;
             }
             
-            $calendar[$firstWeek][(int) $date->format('d')] = $highlight;
-
-            if ($weekIndex % 7 == 0) {
-                if ($currentMonth == 1 && !$prevYearLastWeekReset) {
-                    $firstWeek = 0;
-                    $prevYearLastWeekReset = true;
-                }
-
-                $firstWeek += 1;
-            }
-
-            $weekIndex += 1;
+            $calendar[$actualWeek][$actualDay] = $highlight;
             $date->modify('+1 day');
         }
 
